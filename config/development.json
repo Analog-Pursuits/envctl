@@ -1,0 +1,5 @@
+{
+  "debug": true,
+  "database": "postgres://",
+  "project_name": "envctl"
+}
