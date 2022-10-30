@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{Subcommand, Parser};
 use crate::settings::Settings;
 use crate::rules::Rules;
 
@@ -11,17 +11,21 @@ struct Args {
   #[command(subcommand)]
   action: Action,
 }
-#[derive(Debug, clap::Subcommand)]
+#[derive(Debug, Subcommand)]
 enum Action {
   Add,
   Update,
   Delete,
-  Exec
+  #[command(arg_required_else_help = true )]
+  Exec { 
+    #[arg()]
+    ext_command: String,
+  }
 }
 
 fn main() {
 
-  let settings = Settings::new();
+  let _settings = Settings::new();
   let args = Args::parse();
   let mut rule_engine = Rules::new();
 
@@ -29,13 +33,7 @@ fn main() {
     Action::Add => Rules::add(&mut rule_engine).unwrap(),
     Action::Update => Rules::update(&mut rule_engine).unwrap(),
     Action::Delete => Rules::delete(&mut rule_engine).unwrap(),
-    Action::Exec => Rules::exec(&mut rule_engine).unwrap(),
-
+    Action::Exec { ext_command } => Rules::exec(&mut rule_engine, &ext_command ).unwrap(),
   };
-  println!("{:?}", args);
-  println!("Settings: {:?}",
-    settings
-  );
-
 }
 
