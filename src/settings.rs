@@ -12,7 +12,7 @@ pub struct Settings {
 impl Settings {
   pub fn new() -> Result<Self, ConfigError> {
       let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "development".into());
-      println!("config/{}.json", run_mode);
+      //println!("config/{}.json", run_mode);
       let s = Config::builder()
           .add_source(
               File::with_name(&format!("config/{}.json", run_mode))
@@ -20,7 +20,6 @@ impl Settings {
           )
           .add_source(Environment::with_prefix("envctl"))
           .build()?;
-      println!("debug: {:?}", s.get_bool("debug"));
       return s.try_deserialize()
   }
 }

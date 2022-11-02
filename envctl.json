@@ -1,0 +1,13 @@
+{
+  "root": [
+  {
+    "PolicyName": "Kube",
+    "Matches": "(kubectl (apply|delete|get))",
+    "Rules": [
+      {
+        "RuleName": "WASM-test",
+        "rulebinary": "rules/wasm-test.wasm"
+      }
+    ]
+  }
+]}
