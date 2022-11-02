@@ -5,7 +5,6 @@ use crate::settings::Settings;
 use crate::rules::RuleEngine;
 
 mod settings;
-mod structs;
 mod rules;
 mod proc;
 

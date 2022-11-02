@@ -1,11 +1,10 @@
-use std::{error::Error, fs::read_to_string, fs::File, fs::metadata, fs::read};
-use std::io::Read;
+use std::{error::Error, fs::read_to_string};
 use regex::Regex;
 use crate::{proc::cmd};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json;
-use wasmer::{imports, Instance, Module, Store, Universal};
+use wasmer::{imports, Instance, Module, Value, Store, Universal};
 use wasmer_compiler_cranelift::Cranelift;
 
 
@@ -69,34 +68,19 @@ impl RuleEngine {
     for each in &self.root {
         let re = Regex::new(&each.matches).unwrap();
         if re.is_match(input_command) {
-          // implement WASM runtime here
           for rule in &each.rules {
             let binary_location = rule.rulebinary.to_string();
-            
             let file_binary = std::fs::read(binary_location).unwrap();
             let compiler = Cranelift::new();
-            // Create the store
             let store = Store::new(&Universal::new(compiler).engine());
-
-//            let mut store = Store::new(compiler);
-
-    // Let's compile the Wasm module.
             let module = Module::new(&store, file_binary).unwrap();
-
-    // Create an empty import object.
             let import_object = imports! {};
-
     println!("Instantiating module...");
-    // Let's instantiate the Wasm module.
-            let instance = Instance::new(&module, &import_object).unwrap();
-
-            let sum = instance.exports.get_function("main").unwrap();
-
-    println!("Calling `sum` function...");
-    // Let's call the `sum` exported function. The parameters are a
-    // slice of `Value`s. The results are a boxed slice of `Value`s.
-            let results = sum.call(&[]).unwrap();
-
+            let instance = Instance::new(&module, &import_object)?;
+    println!("Running main loop");
+            let main_func = instance.exports.get_function("main")?;
+            println!("Calling `main` function...");
+            let results = main_func.call(&[Value::I32(1)]).unwrap();
             println!("Results: {:?}", results);
             return Ok(self)
           }
