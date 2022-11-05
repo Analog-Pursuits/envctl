@@ -1,5 +1,6 @@
 use std::{error::Error, fs::read_to_string};
 use regex::Regex;
+use crate::wasm::run_wasm;
 use crate::{directory, proc::cmd};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
@@ -73,42 +74,15 @@ impl RuleEngine {
         if re.is_match(input_command) {
           for rule in &each.rules {
             let binary_location = rule.rulebinary.to_string();
-            let file_binary = std::fs::read(binary_location).unwrap();
-
-            let compiler = Cranelift::new();
-
-            let mut store = Store::new(compiler);
-            
-            let module = Module::new(&store, file_binary).unwrap();
-            //let func_type = FunctionType::new(vec![Type::I32], vec![]);
-            //let print_str = Function::new_typed_with_env(
-            //  &mut store,
-            //  
-            //  wasm::print_str,
-            //);
-            //let return_bool = Function::new_typed(
-            //  &mut store,
-            //  wasm::return_bool,
-            //);
-
-            let import_object = imports! {
-              //"env" => {
-                //// name        // the func! macro autodetects the signature
-                //"print" => print_str,
-                //"return_bool" => return_bool,
-            //},
-            
-            };
-            let instance = Instance::new(&mut store, &module, &import_object)?;
-            if instance.exports.contains("envctlMain") {
-
-            let main_func = instance.exports.get_function("envctlMain")?;
-            let _results: Box<[Value]> = main_func.call(&mut store, &[]).unwrap();
-
-            cmd(input_command).unwrap();
-            return Ok(self)
-            } else {
-              println!("Main function doesn't exist, or something else is going wrong")
+            let exec = run_wasm(binary_location, &[]);
+            match exec {
+              Ok(x) => {
+                println!("WASM module run successfully! {:?}", x);
+                cmd(input_command).unwrap();
+              },
+              Err(err) => {
+                println!("An error occured! {}",err);
+              },
             }
           };
           
