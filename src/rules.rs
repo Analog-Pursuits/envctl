@@ -118,6 +118,10 @@ impl RuleEngine {
           return Ok(self)
         };
       };
+      if &self.root.len() == &0 {
+          // no rules, policies, or matches, passthrough command
+          cmd(input_command).unwrap();
+      }
       return Ok(self);
     }
 }
