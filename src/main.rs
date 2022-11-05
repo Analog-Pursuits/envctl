@@ -8,6 +8,7 @@ mod settings;
 mod wasm;
 mod rules;
 mod proc;
+mod directory;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -36,21 +37,35 @@ enum Action {
   Exec { 
     #[arg(last = true)]
     ext_command: String,
-  }
+  },
+  Init {},
 }
 
 #[flame]
 fn main() {
   Settings::new().unwrap();
   let args = Args::parse();
-  let mut rule_engine = RuleEngine::default();
+
+  let mut rule_engine: RuleEngine;
+
+  // If not init action then load the config file
+  match args.action {
+      Action::Init {} => {
+          rule_engine = RuleEngine { root: vec![] };
+      }
+      _ => {
+          rule_engine = RuleEngine::default();
+      }
+  }
 
   match args.action {
-    //Action::Add { rule_match, rule_file } => RuleEngine::add(&mut rule_engine, rule_match, rule_file).unwrap(),
-    //Action::Update => RuleEngine::update(&mut rule_engine).unwrap(),
-    //Action::Delete => RuleEngine::delete(&mut rule_engine).unwrap(),
-    Action::Exec { ext_command } => RuleEngine::exec(&mut rule_engine, &ext_command ).unwrap(),
+      //Action::Add { rule_match, rule_file } => RuleEngine::add(&mut rule_engine, rule_match, rule_file).unwrap(),
+      //Action::Update => RuleEngine::update(&mut rule_engine).unwrap(),
+      //Action::Delete => RuleEngine::delete(&mut rule_engine).unwrap(),
+      Action::Exec { ext_command } => RuleEngine::exec(&mut rule_engine, &ext_command).unwrap(),
+      Action::Init {} => return RuleEngine::init().unwrap(),
   };
+
   if args.debug == true {
     println!("Outputting Flame graph!");
     flame::dump_html(std::fs::File::create("flamegraph.html").unwrap()).unwrap();

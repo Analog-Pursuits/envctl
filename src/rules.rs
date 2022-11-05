@@ -1,7 +1,6 @@
 use std::{error::Error, fs::read_to_string};
-use directories::BaseDirs;
 use regex::Regex;
-use crate::{proc::cmd};
+use crate::{directory, proc::cmd};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json;
@@ -36,24 +35,9 @@ pub struct Rule {
 
 impl Default for RuleEngine {
   fn default() -> Self {
-    let config_dir = BaseDirs::new();
-    
-    match config_dir {
-      Some(x) => {
-        let project_conf_dir = x.home_dir();
-        let conf_file = project_conf_dir.to_str().unwrap();
-        let config_file = conf_file.to_owned() + "/.config/envctl/config.json";
-        let data = read_to_string(config_file).expect("Unable to read file");
-
-        let config: RuleEngine = serde_json::from_str(&data).unwrap();
-        return config
-
-      },
-      None => {
-        panic!("Failed to find config file");
-      },
-    }
-    
+    let data = read_to_string(&directory::get_config_file_location()).expect("Unable to read file");
+    let config: RuleEngine = serde_json::from_str(&data).unwrap();
+    return config;
   }
 }
 
@@ -77,6 +61,10 @@ impl RuleEngine {
   //  println!("Delete a Rule");
   //  return Ok(self)
   //}
+  pub fn init() -> std::result::Result<(), Box<dyn Error>> {
+    directory::init_config_file();
+    return Ok(());
+  }
 
   #[flame]
   pub fn exec(&mut self, input_command: &str) -> Result<&Self, Box<dyn Error>> {
