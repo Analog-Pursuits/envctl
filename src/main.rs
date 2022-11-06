@@ -58,13 +58,20 @@ fn main() {
       }
   }
 
-  match args.action {
+  let command = match args.action {
       //Action::Add { rule_match, rule_file } => RuleEngine::add(&mut rule_engine, rule_match, rule_file).unwrap(),
       //Action::Update => RuleEngine::update(&mut rule_engine).unwrap(),
       //Action::Delete => RuleEngine::delete(&mut rule_engine).unwrap(),
-      Action::Exec { ext_command } => RuleEngine::exec(&mut rule_engine, &ext_command).unwrap(),
-      Action::Init {} => return RuleEngine::init().unwrap(),
+      Action::Exec { ext_command } => RuleEngine::exec(&mut rule_engine, &ext_command),
+      Action::Init {} => RuleEngine::init(&mut rule_engine),
   };
+
+  match command {
+      Ok(_x) => {},
+      Err(err) => {
+        println!("{:?}", err)
+      },
+  }
 
   if args.debug == true {
     println!("Outputting Flame graph!");

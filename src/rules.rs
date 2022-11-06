@@ -1,12 +1,10 @@
-use std::{error::Error, fs::read_to_string};
+use std::{fs::read_to_string};
 use regex::Regex;
 use crate::wasm::run_wasm;
 use crate::{directory, proc::cmd};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json;
-use wasmer::{imports, Instance, Module, Store, Value};
-use wasmer_compiler_cranelift::Cranelift;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -62,13 +60,13 @@ impl RuleEngine {
   //  println!("Delete a Rule");
   //  return Ok(self)
   //}
-  pub fn init() -> std::result::Result<(), Box<dyn Error>> {
+  pub fn init(&mut self) -> std::result::Result<&Self, &'static str> {
     directory::init_config_file();
-    return Ok(());
+    return Ok(self);
   }
 
   #[flame]
-  pub fn exec(&mut self, input_command: &str) -> Result<&Self, Box<dyn Error>> {
+  pub fn exec(&mut self, input_command: &str) -> Result<&Self, &'static str> {
     for each in &self.root {
         let re = Regex::new(&each.matches).unwrap();
         if re.is_match(input_command) {
@@ -76,12 +74,12 @@ impl RuleEngine {
             let binary_location = rule.rulebinary.to_string();
             let exec = run_wasm(binary_location, &[]);
             match exec {
-              Ok(x) => {
-                println!("WASM module run successfully! {:?}", x);
+              Ok(_x) => {
                 cmd(input_command).unwrap();
+                return Ok(self);
               },
               Err(err) => {
-                println!("An error occured! {}",err);
+                return Err(err);
               },
             }
           };
