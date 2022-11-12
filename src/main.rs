@@ -25,14 +25,6 @@ struct Args {
 }
 #[derive(Debug, Subcommand)]
 enum Action {
-  //Add {
-  //  #[arg()]
-  //  rule_match: String,
-  //  #[arg()]
-  //  rule_file: std::path::PathBuf,
-  //},
-  //Update,
-  //Delete,
   #[command(arg_required_else_help = true )]
   Exec { 
     #[arg(last = true)]
@@ -59,9 +51,6 @@ fn main() {
   }
 
   let command = match args.action {
-      //Action::Add { rule_match, rule_file } => RuleEngine::add(&mut rule_engine, rule_match, rule_file).unwrap(),
-      //Action::Update => RuleEngine::update(&mut rule_engine).unwrap(),
-      //Action::Delete => RuleEngine::delete(&mut rule_engine).unwrap(),
       Action::Exec { ext_command } => RuleEngine::exec(&mut rule_engine, &ext_command),
       Action::Init {} => RuleEngine::init(&mut rule_engine),
   };
