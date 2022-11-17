@@ -4,6 +4,9 @@ use clap::{Subcommand, Parser};
 use crate::settings::Settings;
 use crate::rules::RuleEngine;
 
+#[cfg(test)]
+mod tests;
+
 mod settings;
 mod wasm;
 mod rules;

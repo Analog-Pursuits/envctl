@@ -2,14 +2,13 @@ mod imports;
 
 use wasmtime::*;
 use wasmtime_wasi::{WasiCtx, sync::WasiCtxBuilder};
-
-use anyhow::{Result};
+use anyhow::{Result, Context};
 
 struct MyState {
   wasi: WasiCtx,
 }
 
-pub fn run_wasm(binary: String) -> Result<()> {
+pub fn run_wasm(binary: String, name: Option<&str>) -> Result<()> {
     // Enable epoch interruption code via `Config` which means that code will
     // get interrupted when `Engine::increment_epoch` happens.
     let engine = Engine::new(Config::new().epoch_interruption(true)).unwrap();
@@ -36,38 +35,58 @@ pub fn run_wasm(binary: String) -> Result<()> {
       .get_default(&mut store, "");
       match main_func {
         Ok(x) => {
-          let func_type = x.typed::<(), (), _>(&store);
-          match func_type {
+          let ty = x.ty(&store);
+          let values = Vec::new();
+          //let mut results = vec![Val::null(); ty.results().len()];
+          let mut results = Vec::new();
+          let function = x.call(store, &values, &mut results).with_context(|| {
+            if let Some(name) = name {
+                format!("failed to invoke `{}`", name)
+            } else {
+                format!("failed to invoke command default")
+            }
+          });
+          if !&results.is_empty() {
+            eprintln!(
+                "warning: using `--invoke` with a function that returns values \
+                 is experimental and may break in the future"
+            );
+        }
+          match function {
             Ok(x) => {
-              let called_func = x.call(store, ());
-              match called_func {
-                Ok(x) => {
-                  return Ok(x);
-                },
-                Err(err) => {
-                  eprintln!("Something went wrong in the called function: {:?}", err)
+              println!("Function returned successfully.");
+              println!("{:?}", results);
+              for result in results {
+                println!("Internal to value loop");
+                match result {
+                    Val::I32(i) => println!("{}", i),
+                    Val::I64(i) => println!("{}", i),
+                    Val::F32(f) => println!("{}", f32::from_bits(f)),
+                    Val::F64(f) => println!("{}", f64::from_bits(f)),
+                    Val::ExternRef(_) => println!("<externref>"),
+                    Val::FuncRef(_) => println!("<funcref>"),
+                    Val::V128(i) => println!("{}", i),
                 }
               }
-              return Ok(());
             },
             Err(err) => {
-                eprintln!("An error occured: {}", err);
-              return Err(err);
+              println!("Err: {}", err)
             }
           }
+
+          
+          return Ok(());
+
         },
         Err(err) => {
+            eprintln!("An error occured: {}", err);
           return Err(err);
         }
       }
-    
-    }
-  
+    },
     Err(err) => {
       eprintln!("An Error occured in the root match: {}", err);
       return Err(err);
-      //return Err("There was an error instantiating the WASM instance.".to_string())
     }
   }
-
 }

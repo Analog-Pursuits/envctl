@@ -27,9 +27,8 @@ pub struct Root {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Rule {
-    #[serde(rename = "RuleName")]
     pub rule_name: String,
-    pub rulebinary: String,
+    pub rule_binary: String,
     pub rule_entrypoint: Option<String>,
 }
 
@@ -54,27 +53,24 @@ impl RuleEngine {
         let re = Regex::new(&each.matches).unwrap();
         if re.is_match(input_command) {
           for rule in &each.rules {
-            let binary_location = rule.rulebinary.to_string();
-                let exec = run_wasm(binary_location);
+            let binary_location = rule.rule_binary.to_string();
+                let exec = run_wasm(binary_location, Some(""));
                 match exec {
-                  Ok(_x) => {},
                   Err(err) => {
                     return Err(err.to_string());
                   },
+                  _ => {}
             };
           };
+          println!("WASM");
           cmd(input_command).unwrap();
-          
+          return Ok(self);
         } else {
-          // no match, passthrough command
-          cmd(input_command).unwrap();
-          return Ok(self)
         };
       };
-      if &self.root.len() == &0 {
-          // no rules, policies, or matches, passthrough command
-          cmd(input_command).unwrap();
-      }
+      // no rules, policies, or matches, passthrough command
+      println!("naht WASM");
+      cmd(input_command).unwrap();
       return Ok(self);
     }
 }
