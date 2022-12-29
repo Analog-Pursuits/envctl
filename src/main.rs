@@ -38,7 +38,6 @@ fn main() {
 
     let mut rule_engine: RuleEngine;
 
-    // If not init action then load the config file
     match args.action {
         Action::Init {} => {
             rule_engine = RuleEngine { root: vec![] };

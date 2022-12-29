@@ -5,7 +5,6 @@ use std::env;
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub debug: bool,
-    pub database: String,
     pub project_name: String,
 }
 

@@ -1,4 +1,4 @@
-use crate::wasm::{run_wasm};
+use crate::wasm::run_wasi;
 use crate::{directory, proc::cmd};
 use regex::Regex;
 use serde_derive::Deserialize;
@@ -61,7 +61,7 @@ impl RuleEngine {
             if re.is_match(input_command) {
                 for rule in &each.rules {
                     let binary_location = rule.rule_binary.to_string();
-                    let exec = run_wasm(binary_location);
+                    let exec = run_wasi(binary_location);
                     match exec {
                         Err(err) => {
                             return Err(err.to_string());

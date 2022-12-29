@@ -1,0 +1,21 @@
+{
+	"folders": [
+    {
+      "name": "root",
+      "path": "."
+    },
+    {
+      "name": "Config folder",
+      "path": "/Users/matt/.config/envctl/"
+    },
+    {
+      "name": "Examples",
+      "path": "examples/hello-world"
+    },
+    {
+      "name": "workers",
+      "path": "../envctl-backend"
+    }
+  ],
+
+}
