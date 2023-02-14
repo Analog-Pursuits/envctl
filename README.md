@@ -1,9 +1,19 @@
 # ENVCTL
+
 envctl is for Environment Control,
 
 used correctly, it checks every command you make, and applies it to any workflow configured for it.
 
+## Installation and Getting Started
+
+You can find the documentation for installation and getting started here.
+
+[Installation](https://github.com/Analog-Pursuits/envctl/blob/main/docs/getting-started/install.md)
+
+[Getting Started](https://github.com/Analog-Pursuits/envctl/blob/main/docs/getting-started/getting-started.md)
+
 # Rule configuration example
+
 ```json
 [
   {
